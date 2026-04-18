@@ -1,0 +1,16 @@
+# 날씨 수집 위치 목록
+# Open-Meteo API 기준 (위도·경도)
+# timezone: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+
+locations:
+  - name: Seoul
+    name_ko: 서울
+    latitude: 37.5665
+    longitude: 126.9780
+    timezone: Asia/Seoul
+
+  - name: Busan
+    name_ko: 부산
+    latitude: 35.1796
+    longitude: 129.0756
+    timezone: Asia/Seoul

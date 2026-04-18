@@ -1,22 +1,22 @@
-name: RSS Daily Snapshot
+name: Weather Daily Snapshot
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 23 * * *'   # 매일 KST 08:00 (UTC 23:00 전날)
-
-concurrency:
-  group: commit-main    # Phase 2+ 모듈과 동시 커밋 충돌 방지
-  cancel-in-progress: false
+    - cron: '10 23 * * *'   # 매일 KST 08:10 (RSS보다 10분 뒤)
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+concurrency:
+  group: commit-main    # RSS 워크플로우와 동시 커밋 충돌 방지
+  cancel-in-progress: false
 
 jobs:
   collect-and-commit:
     runs-on: ubuntu-latest
     permissions:
-      contents: write   # git push 권한
+      contents: write
 
     steps:
       - uses: actions/checkout@v4
@@ -26,15 +26,15 @@ jobs:
       - name: Install dependencies
         run: uv sync --frozen
 
-      - name: Run RSS collector
-        run: uv run python -m daily_hub.collectors.rss
+      - name: Run Weather collector
+        run: uv run python -m daily_hub.collectors.weather
 
       - name: Commit and push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add snapshots/rss state/rss-last-seen.json
+          git add snapshots/weather
           git diff --staged --quiet \
             && echo "변경 없음 — 커밋 스킵" \
-            || git commit -m "chore(rss): daily snapshot $(date +%Y-%m-%d)"
+            || git commit -m "chore(weather): daily snapshot $(date +%Y-%m-%d)"
           git push
