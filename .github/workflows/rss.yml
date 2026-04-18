@@ -10,33 +10,28 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  collect:
+  collect-and-commit:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write   # git push 권한
+
     steps:
       - uses: actions/checkout@v4
 
       - uses: astral-sh/setup-uv@v5
-        with:
-          version: "latest"
 
       - name: Install dependencies
-        run: uv sync
+        run: uv sync --frozen
 
       - name: Run RSS collector
         run: uv run python -m daily_hub.collectors.rss
 
-      - name: Upload snapshot artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: rss-snapshot
-          path: |
-            snapshots/rss/
-            state/rss-last-seen.json
-          retention-days: 1
-
-  commit:
-    needs: collect
-    uses: ./.github/workflows/_shared-commit.yml
-    with:
-      commit_message: "chore(rss): daily snapshot ${{ github.run_id }}"
-      paths: "snapshots/rss state/rss-last-seen.json"
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add snapshots/rss state/rss-last-seen.json
+          git diff --staged --quiet \
+            && echo "변경 없음 — 커밋 스킵" \
+            || git commit -m "chore(rss): daily snapshot $(date +%Y-%m-%d)"
+          git push
