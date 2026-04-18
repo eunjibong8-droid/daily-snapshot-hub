@@ -1,0 +1,42 @@
+name: RSS Daily Snapshot
+
+on:
+  workflow_dispatch:   # 수동 트리거로 먼저 테스트
+  # schedule:
+  #   - cron: '0 23 * * *'   # 매일 KST 08:00 (UTC 23:00 전날)
+
+concurrency:
+  group: commit-main    # Phase 2+ 모듈과 동시 커밋 충돌 방지
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          version: "latest"
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Run RSS collector
+        run: uv run python -m daily_hub.collectors.rss
+
+      - name: Upload snapshot artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: rss-snapshot
+          path: |
+            snapshots/rss/
+            state/rss-last-seen.json
+          retention-days: 1
+
+  commit:
+    needs: collect
+    uses: ./.github/workflows/_shared-commit.yml
+    with:
+      commit_message: "chore(rss): daily snapshot ${{ github.run_id }}"
+      paths: "snapshots/rss state/rss-last-seen.json"

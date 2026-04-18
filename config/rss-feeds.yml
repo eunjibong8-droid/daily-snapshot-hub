@@ -1,0 +1,35 @@
+# RSS 피드 목록
+# 첫 실행 전 URL이 유효한지 브라우저에서 한 번 확인하세요.
+
+feeds:
+  - name: Hacker News Top
+    url: https://news.ycombinator.com/rss
+    category: 기술 뉴스
+
+  - name: GitHub Blog
+    url: https://github.blog/feed/
+    category: 개발 플랫폼
+
+  - name: AWS Blog
+    url: https://aws.amazon.com/blogs/aws/feed/
+    category: 클라우드
+
+  - name: Real Python
+    url: https://realpython.com/atom.xml
+    category: Python
+
+  - name: Martin Fowler
+    url: https://martinfowler.com/feed.atom
+    category: 아키텍처
+
+  - name: Anthropic News
+    url: https://www.anthropic.com/feed.xml
+    category: AI
+
+  - name: The Pragmatic Engineer
+    url: https://newsletter.pragmaticengineer.com/feed
+    category: 엔지니어링
+
+  - name: InfoQ
+    url: https://www.infoq.com/feed/
+    category: 기술 전반
