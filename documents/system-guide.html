@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Snapshot Hub — 시스템 가이드</title>
+<style>
+  :root {
+    --bg: #f8fafc; --white: #ffffff; --border: #e2e8f0;
+    --text: #1e293b; --muted: #64748b;
+    --blue: #3b82f6; --blue-l: #eff6ff;
+    --green: #10b981; --green-l: #ecfdf5;
+    --purple: #8b5cf6; --purple-l: #f5f3ff;
+    --orange: #f59e0b; --orange-l: #fffbeb;
+    --red: #ef4444; --red-l: #fef2f2;
+    --sidebar: 240px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif; background: var(--bg); color: var(--text); display: flex; }
+
+  /* ── 사이드바 ── */
+  nav {
+    width: var(--sidebar); min-height: 100vh; background: var(--white);
+    border-right: 1px solid var(--border); padding: 28px 16px;
+    position: sticky; top: 0; height: 100vh; overflow-y: auto; flex-shrink: 0;
+  }
+  .nav-logo { font-size: 13px; font-weight: 800; color: var(--blue); margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+  .nav-section { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin: 16px 0 6px; }
+  nav a { display: block; font-size: 13px; color: var(--muted); text-decoration: none; padding: 5px 10px; border-radius: 6px; margin-bottom: 2px; }
+  nav a:hover, nav a.active { background: var(--blue-l); color: var(--blue); font-weight: 600; }
+
+  /* ── 메인 ── */
+  main { flex: 1; padding: 48px 56px 100px; max-width: 900px; }
+  section { margin-bottom: 72px; scroll-margin-top: 24px; }
+  h1 { font-size: 30px; font-weight: 800; margin-bottom: 8px; }
+  h2 { font-size: 22px; font-weight: 800; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid var(--border); }
+  h3 { font-size: 16px; font-weight: 700; margin: 20px 0 10px; }
+  p  { font-size: 14px; line-height: 1.75; color: var(--muted); margin-bottom: 12px; }
+
+  /* ── 배지 ── */
+  .badge { display: inline-flex; align-items: center; gap: 6px; padding: 3px 12px; border-radius: 99px; font-size: 12px; font-weight: 700; margin-bottom: 10px; }
+  .badge-blue   { background: var(--blue-l);   color: var(--blue); }
+  .badge-green  { background: var(--green-l);  color: var(--green); }
+  .badge-purple { background: var(--purple-l); color: var(--purple); }
+  .badge-orange { background: var(--orange-l); color: var(--orange); }
+
+  /* ── 카드 ── */
+  .card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; padding: 24px; margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,.04); }
+  .card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
+  .card-sm { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 18px 16px; }
+  .card-sm h4 { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+  .card-sm p  { font-size: 12px; }
+
+  /* ── 테이블 ── */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 12px 0 20px; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
+  th { background: #f1f5f9; padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 700; color: var(--muted); }
+  td { padding: 10px 14px; border-top: 1px solid var(--border); vertical-align: top; }
+
+  /* ── 코드 ── */
+  pre { background: #1e293b; color: #e2e8f0; border-radius: 10px; padding: 18px; font-size: 12px; line-height: 1.7; overflow-x: auto; margin: 12px 0 20px; }
+  code { font-family: 'Consolas','Fira Code',monospace; }
+  .inline-code { background: #f1f5f9; color: #0f172a; padding: 2px 7px; border-radius: 5px; font-size: 12px; font-family: 'Consolas',monospace; }
+
+  /* ── 타임라인 ── */
+  .timeline { display: flex; align-items: center; gap: 0; margin: 20px 0; overflow-x: auto; padding-bottom: 8px; }
+  .tl-item { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
+  .tl-dot  { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; color: white; }
+  .tl-line { width: 60px; height: 2px; background: var(--border); flex-shrink: 0; }
+  .tl-label { font-size: 10px; font-weight: 700; margin-top: 6px; text-align: center; }
+  .tl-time  { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+  /* ── info box ── */
+  .info { display: flex; gap: 12px; align-items: flex-start; border-radius: 10px; padding: 14px 16px; margin: 12px 0; border: 1px solid; font-size: 13px; }
+  .info-blue   { background: var(--blue-l);   border-color: #bfdbfe; }
+  .info-green  { background: var(--green-l);  border-color: #a7f3d0; }
+  .info-orange { background: var(--orange-l); border-color: #fde68a; }
+
+  /* ── dir tree ── */
+  .tree { background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; font-family: 'Consolas',monospace; font-size: 12px; line-height: 1.9; }
+  .tree .dir  { color: var(--blue); font-weight: 700; }
+  .tree .file { color: var(--text); }
+  .tree .note { color: var(--muted); }
+
+  @media (max-width: 800px) {
+    nav { display: none; }
+    main { padding: 24px 20px; }
+    .card-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">📦 Daily Snapshot Hub</div>
+  <div class="nav-section">개요</div>
+  <a href="#overview">프로젝트 소개</a>
+  <a href="#architecture">전체 아키텍처</a>
+  <a href="#schedule">스케줄 타임라인</a>
+  <div class="nav-section">모듈</div>
+  <a href="#rss">RSS 다이제스트</a>
+  <a href="#weather">날씨·미세먼지</a>
+  <a href="#weekly">주간 통합 리포트</a>
+  <div class="nav-section">운영</div>
+  <a href="#workflows">GitHub Actions</a>
+  <a href="#structure">디렉터리 구조</a>
+  <a href="#config">설정 가이드</a>
+</nav>
+
+<main>
+
+  <!-- ══ 헤더 ══ -->
+  <section id="overview">
+    <div class="badge badge-blue">📦 프로젝트 소개</div>
+    <h1>Daily Snapshot Hub</h1>
+    <p>GitHub Actions 기반 일일 데이터 수집·아카이빙 허브. 여러 수집 모듈이 독립적으로 동작하며, 수집 결과를 매일 repo에 커밋해 쌓아둡니다. 하나의 모듈이 실패해도 나머지는 계속 동작합니다.</p>
+
+    <div class="card-grid">
+      <div class="card-sm" style="border-top: 3px solid var(--blue)">
+        <h4>📰 RSS 다이제스트</h4>
+        <p>8개 피드에서 새 글을 매일 수집해 Markdown으로 아카이빙</p>
+      </div>
+      <div class="card-sm" style="border-top: 3px solid var(--green)">
+        <h4>🌤️ 날씨·미세먼지</h4>
+        <p>서울·부산 기온·강수·PM10·PM2.5를 CSV로 월별 누적</p>
+      </div>
+      <div class="card-sm" style="border-top: 3px solid var(--purple)">
+        <h4>📊 주간 리포트</h4>
+        <p>매주 월요일, 지난 주 RSS + 날씨를 한 페이지로 통합</p>
+      </div>
+    </div>
+
+    <div class="info info-blue">
+      <span>💡</span>
+      <div>Public repo로 운영됩니다. AWS 키·개인 API 키는 절대 커밋하지 않고 <span class="inline-code">secrets.</span> 네임스페이스만 사용합니다. 수집 데이터도 공개돼도 무방한 것만 포함합니다.</div>
+    </div>
+  </section>
+
+  <!-- ══ 아키텍처 ══ -->
+  <section id="architecture">
+    <div class="badge badge-blue">🏗️ 전체 아키텍처</div>
+    <h2>시스템 구조</h2>
+
+    <div class="card">
+      <svg width="100%" viewBox="0 0 780 320" font-family="'Segoe UI','Apple SD Gothic Neo',system-ui,sans-serif">
+        <!-- 배경 영역 -->
+        <rect x="10"  y="50" width="220" height="240" rx="12" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.5"/>
+        <rect x="250" y="50" width="220" height="240" rx="12" fill="#ecfdf5" stroke="#a7f3d0" stroke-width="1.5"/>
+        <rect x="490" y="50" width="220" height="240" rx="12" fill="#f5f3ff" stroke="#ddd6fe" stroke-width="1.5"/>
+
+        <!-- 영역 타이틀 -->
+        <text x="120" y="40" text-anchor="middle" font-size="12" font-weight="700" fill="#3b82f6">수집 모듈</text>
+        <text x="360" y="40" text-anchor="middle" font-size="12" font-weight="700" fill="#10b981">저장소</text>
+        <text x="600" y="40" text-anchor="middle" font-size="12" font-weight="700" fill="#8b5cf6">결과물</text>
+
+        <!-- 수집 모듈 박스들 -->
+        <rect x="30"  y="80"  width="180" height="44" rx="8" fill="#3b82f6"/>
+        <text x="120" y="97"  text-anchor="middle" font-size="13" font-weight="700" fill="white">📰 RSS Collector</text>
+        <text x="120" y="114" text-anchor="middle" font-size="11" fill="#bfdbfe">8개 피드 · feedparser</text>
+
+        <rect x="30"  y="155" width="180" height="44" rx="8" fill="#10b981"/>
+        <text x="120" y="172" text-anchor="middle" font-size="13" font-weight="700" fill="white">🌤️ Weather Collector</text>
+        <text x="120" y="189" text-anchor="middle" font-size="11" fill="#a7f3d0">Open-Meteo API · httpx</text>
+
+        <rect x="30"  y="230" width="180" height="44" rx="8" fill="#8b5cf6"/>
+        <text x="120" y="247" text-anchor="middle" font-size="13" font-weight="700" fill="white">📊 Weekly Reporter</text>
+        <text x="120" y="264" text-anchor="middle" font-size="11" fill="#ddd6fe">크로스 모듈 집계</text>
+
+        <!-- 화살표 -->
+        <line x1="210" y1="102" x2="248" y2="102" stroke="#3b82f6" stroke-width="2" marker-end="url(#arr-b)"/>
+        <line x1="210" y1="177" x2="248" y2="177" stroke="#10b981" stroke-width="2" marker-end="url(#arr-g)"/>
+        <line x1="210" y1="252" x2="248" y2="252" stroke="#8b5cf6" stroke-width="2" marker-end="url(#arr-p)"/>
+
+        <!-- 저장소 박스들 -->
+        <rect x="260" y="80"  width="200" height="44" rx="8" fill="white" stroke="#bfdbfe" stroke-width="1.5"/>
+        <text x="360" y="97"  text-anchor="middle" font-size="12" fill="#1e293b">📁 snapshots/rss/</text>
+        <text x="360" y="114" text-anchor="middle" font-size="11" fill="#64748b">YYYY-MM-DD.md</text>
+
+        <rect x="260" y="155" width="200" height="44" rx="8" fill="white" stroke="#a7f3d0" stroke-width="1.5"/>
+        <text x="360" y="172" text-anchor="middle" font-size="12" fill="#1e293b">📁 snapshots/weather/</text>
+        <text x="360" y="189" text-anchor="middle" font-size="11" fill="#64748b">YYYY-MM.csv</text>
+
+        <rect x="260" y="230" width="200" height="44" rx="8" fill="white" stroke="#ddd6fe" stroke-width="1.5"/>
+        <text x="360" y="247" text-anchor="middle" font-size="12" fill="#1e293b">📁 reports/weekly/</text>
+        <text x="360" y="264" text-anchor="middle" font-size="11" fill="#64748b">YYYY-WNN.md</text>
+
+        <!-- 화살표 -->
+        <line x1="460" y1="102" x2="488" y2="102" stroke="#3b82f6" stroke-width="2" marker-end="url(#arr-b)"/>
+        <line x1="460" y1="177" x2="488" y2="177" stroke="#10b981" stroke-width="2" marker-end="url(#arr-g)"/>
+        <line x1="460" y1="252" x2="488" y2="252" stroke="#8b5cf6" stroke-width="2" marker-end="url(#arr-p)"/>
+
+        <!-- 결과물 박스들 -->
+        <rect x="498" y="80"  width="200" height="44" rx="8" fill="white" stroke="#ddd6fe" stroke-width="1.5"/>
+        <text x="598" y="97"  text-anchor="middle" font-size="12" fill="#1e293b">git commit</text>
+        <text x="598" y="114" text-anchor="middle" font-size="11" fill="#64748b">매일 자동 커밋</text>
+
+        <rect x="498" y="155" width="200" height="44" rx="8" fill="white" stroke="#ddd6fe" stroke-width="1.5"/>
+        <text x="598" y="172" text-anchor="middle" font-size="12" fill="#1e293b">git commit</text>
+        <text x="598" y="189" text-anchor="middle" font-size="11" fill="#64748b">매일 자동 커밋</text>
+
+        <rect x="498" y="230" width="200" height="44" rx="8" fill="white" stroke="#ddd6fe" stroke-width="1.5"/>
+        <text x="598" y="247" text-anchor="middle" font-size="12" fill="#1e293b">git commit</text>
+        <text x="598" y="264" text-anchor="middle" font-size="11" fill="#64748b">매주 월요일 자동</text>
+
+        <!-- state 박스 -->
+        <rect x="30" y="295" width="180" height="30" rx="6" fill="#fff7ed" stroke="#fed7aa" stroke-width="1.5"/>
+        <text x="120" y="314" text-anchor="middle" font-size="11" fill="#92400e">📌 state/ (last-seen 상태)</text>
+
+        <defs>
+          <marker id="arr-b" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#3b82f6"/></marker>
+          <marker id="arr-g" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#10b981"/></marker>
+          <marker id="arr-p" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#8b5cf6"/></marker>
+        </defs>
+      </svg>
+    </div>
+
+    <div class="info info-green">
+      <span>🔒</span>
+      <div><strong>실패 격리</strong> — 각 모듈은 완전히 독립된 GitHub Actions 잡으로 실행됩니다. RSS가 실패해도 날씨 수집은 계속 돌고, 날씨가 실패해도 주간 리포트는 이전 데이터로 생성됩니다.</div>
+    </div>
+  </section>
+
+  <!-- ══ 스케줄 ══ -->
+  <section id="schedule">
+    <div class="badge badge-orange">⏰ 스케줄</div>
+    <h2>실행 타임라인</h2>
+    <p>세 워크플로우는 서로 겹치지 않도록 10분 간격으로 순차 실행됩니다. <span class="inline-code">concurrency: group: commit-main</span>으로 동시 커밋 충돌을 방지합니다.</p>
+
+    <div class="card">
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-dot" style="background:var(--blue)">📰</div>
+          <div class="tl-label">RSS</div>
+          <div class="tl-time">KST 08:00</div>
+        </div>
+        <div class="tl-line"></div>
+        <div class="tl-item">
+          <div class="tl-dot" style="background:var(--green)">🌤️</div>
+          <div class="tl-label">날씨</div>
+          <div class="tl-time">KST 08:10</div>
+        </div>
+        <div class="tl-line"></div>
+        <div class="tl-item">
+          <div class="tl-dot" style="background:var(--muted)">💤</div>
+          <div class="tl-label">대기</div>
+          <div class="tl-time">화~일</div>
+        </div>
+        <div class="tl-line"></div>
+        <div class="tl-item">
+          <div class="tl-dot" style="background:var(--purple)">📊</div>
+          <div class="tl-label">주간 리포트</div>
+          <div class="tl-time">월 KST 08:30</div>
+        </div>
+      </div>
+    </div>
+
+    <table>
+      <tr><th>워크플로우</th><th>Cron (UTC)</th><th>KST</th><th>빈도</th></tr>
+      <tr><td>rss.yml</td><td><code>0 23 * * *</code></td><td>매일 08:00</td><td>매일</td></tr>
+      <tr><td>weather.yml</td><td><code>10 23 * * *</code></td><td>매일 08:10</td><td>매일</td></tr>
+      <tr><td>weekly-report.yml</td><td><code>30 23 * * 0</code></td><td>매주 월요일 08:30</td><td>주 1회</td></tr>
+    </table>
+  </section>
+
+  <!-- ══ RSS ══ -->
+  <section id="rss">
+    <div class="badge badge-blue">📰 모듈 1</div>
+    <h2>RSS 다이제스트</h2>
+    <p>구독 피드의 새 글을 매일 수집해 <span class="inline-code">snapshots/rss/YYYY-MM-DD.md</span>에 저장합니다. 피드별로 독립 처리해 하나가 실패해도 나머지는 정상 수집됩니다.</p>
+
+    <h3>수집 흐름</h3>
+    <div class="card">
+      <svg width="100%" viewBox="0 0 700 100" font-family="'Segoe UI',system-ui,sans-serif">
+        <defs><marker id="a" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#3b82f6"/></marker></defs>
+        <rect x="10"  y="28" width="120" height="44" rx="8" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.5"/>
+        <text x="70"  y="50" text-anchor="middle" font-size="12" font-weight="700" fill="#1d4ed8">rss-feeds.yml</text>
+        <text x="70"  y="65" text-anchor="middle" font-size="10" fill="#64748b">8개 피드 설정</text>
+        <line x1="130" y1="50" x2="158" y2="50" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#a)"/>
+        <rect x="160" y="28" width="120" height="44" rx="8" fill="#3b82f6"/>
+        <text x="220" y="50" text-anchor="middle" font-size="12" font-weight="700" fill="white">feedparser</text>
+        <text x="220" y="65" text-anchor="middle" font-size="10" fill="#bfdbfe">피드 파싱</text>
+        <line x1="280" y1="50" x2="308" y2="50" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#a)"/>
+        <rect x="310" y="28" width="130" height="44" rx="8" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.5"/>
+        <text x="375" y="50" text-anchor="middle" font-size="12" font-weight="700" fill="#1d4ed8">중복 제거</text>
+        <text x="375" y="65" text-anchor="middle" font-size="10" fill="#64748b">last-seen 기준</text>
+        <line x1="440" y1="50" x2="468" y2="50" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#a)"/>
+        <rect x="470" y="28" width="130" height="44" rx="8" fill="#3b82f6"/>
+        <text x="535" y="50" text-anchor="middle" font-size="12" font-weight="700" fill="white">📄 MD 저장</text>
+        <text x="535" y="65" text-anchor="middle" font-size="10" fill="#bfdbfe">snapshots/rss/</text>
+        <line x1="600" y1="50" x2="628" y2="50" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#a)"/>
+        <rect x="630" y="28" width="60" height="44" rx="8" fill="#ecfdf5" stroke="#a7f3d0" stroke-width="1.5"/>
+        <text x="660" y="50" text-anchor="middle" font-size="12" fill="#065f46">state</text>
+        <text x="660" y="65" text-anchor="middle" font-size="10" fill="#64748b">갱신</text>
+      </svg>
+    </div>
+
+    <h3>구독 피드</h3>
+    <table>
+      <tr><th>피드</th><th>카테고리</th><th>특징</th></tr>
+      <tr><td>Hacker News Top</td><td>기술 뉴스</td><td>기술 트렌드 감지용</td></tr>
+      <tr><td>GitHub Blog</td><td>개발 플랫폼</td><td>Actions, Copilot 등 GitHub 소식</td></tr>
+      <tr><td>AWS Blog</td><td>클라우드</td><td>서비스 업데이트·사례</td></tr>
+      <tr><td>Real Python</td><td>Python</td><td>튜토리얼·심화 아티클</td></tr>
+      <tr><td>Martin Fowler</td><td>아키텍처</td><td>설계·패턴 고품질 글</td></tr>
+      <tr><td>Anthropic News</td><td>AI</td><td>Claude·AI 정책 소식</td></tr>
+      <tr><td>The Pragmatic Engineer</td><td>엔지니어링</td><td>시니어 엔지니어링 인사이트</td></tr>
+      <tr><td>InfoQ</td><td>기술 전반</td><td>아키텍처·DevOps·언어 뉴스</td></tr>
+    </table>
+
+    <h3>중복 제거 방식</h3>
+    <p><span class="inline-code">state/rss-last-seen.json</span>에 피드별 마지막 수집 시각(UTC ISO)을 저장합니다. 다음 실행 시 해당 시각 이후에 발행된 항목만 수집합니다. 첫 실행에는 전체 항목을 수집합니다.</p>
+  </section>
+
+  <!-- ══ 날씨 ══ -->
+  <section id="weather">
+    <div class="badge badge-green">🌤️ 모듈 2</div>
+    <h2>날씨·미세먼지</h2>
+    <p>Open-Meteo API (무료, API 키 불필요)를 사용해 서울·부산의 날씨 데이터를 수집합니다. 하루 한 행씩 월별 CSV에 누적합니다.</p>
+
+    <h3>수집 항목</h3>
+    <div class="card-grid">
+      <div class="card-sm">
+        <h4>🌡️ 기온</h4>
+        <p>현재 기온, 체감온도, 일 최고·최저</p>
+      </div>
+      <div class="card-sm">
+        <h4>💧 습도·강수</h4>
+        <p>습도(%), 강수량(mm), 강수확률(%)</p>
+      </div>
+      <div class="card-sm">
+        <h4>💨 바람·UV</h4>
+        <p>풍속(km/h), 자외선 지수</p>
+      </div>
+      <div class="card-sm">
+        <h4>🌫️ 미세먼지</h4>
+        <p>PM10, PM2.5 (Air Quality API)</p>
+      </div>
+      <div class="card-sm">
+        <h4>📍 위치</h4>
+        <p>서울 (37.57°N) · 부산 (35.18°N)</p>
+      </div>
+      <div class="card-sm">
+        <h4>📁 저장 형식</h4>
+        <p>snapshots/weather/YYYY-MM.csv<br>월별 누적, 헤더 1회</p>
+      </div>
+    </div>
+
+    <h3>위치 추가 방법</h3>
+    <p><span class="inline-code">config/locations.yml</span>에 위도·경도·타임존을 추가하면 코드 수정 없이 새 도시가 수집됩니다.</p>
+    <pre><code>locations:
+  - name: Jeju
+    name_ko: 제주
+    latitude: 33.4996
+    longitude: 126.5312
+    timezone: Asia/Seoul</code></pre>
+  </section>
+
+  <!-- ══ 주간 리포트 ══ -->
+  <section id="weekly">
+    <div class="badge badge-purple">📊 모듈 3</div>
+    <h2>주간 통합 리포트</h2>
+    <p>매주 월요일 KST 08:30, 직전 ISO 주차(월~일)의 RSS + 날씨 데이터를 읽어 한 페이지로 통합합니다. 크로스 모듈 집계가 이 프로젝트의 핵심 가치입니다.</p>
+
+    <div class="card">
+      <svg width="100%" viewBox="0 0 680 160" font-family="'Segoe UI',system-ui,sans-serif">
+        <defs><marker id="wa" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#8b5cf6"/></marker></defs>
+        <!-- 소스들 -->
+        <rect x="10"  y="20" width="150" height="40" rx="8" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.5"/>
+        <text x="85"  y="36" text-anchor="middle" font-size="12" font-weight="700" fill="#1d4ed8">📁 snapshots/rss/</text>
+        <text x="85"  y="52" text-anchor="middle" font-size="10" fill="#64748b">7개 MD 파일 파싱</text>
+
+        <rect x="10"  y="100" width="150" height="40" rx="8" fill="#ecfdf5" stroke="#a7f3d0" stroke-width="1.5"/>
+        <text x="85"  y="116" text-anchor="middle" font-size="12" font-weight="700" fill="#065f46">📁 snapshots/weather/</text>
+        <text x="85"  y="132" text-anchor="middle" font-size="10" fill="#64748b">CSV 행 필터·집계</text>
+
+        <line x1="160" y1="40"  x2="248" y2="75" stroke="#8b5cf6" stroke-width="1.5" marker-end="url(#wa)"/>
+        <line x1="160" y1="120" x2="248" y2="85" stroke="#8b5cf6" stroke-width="1.5" marker-end="url(#wa)"/>
+
+        <!-- 리포터 -->
+        <rect x="250" y="55" width="140" height="50" rx="8" fill="#8b5cf6"/>
+        <text x="320" y="76" text-anchor="middle" font-size="13" font-weight="700" fill="white">weekly.py</text>
+        <text x="320" y="93" text-anchor="middle" font-size="10" fill="#ddd6fe">크로스 모듈 집계</text>
+
+        <line x1="390" y1="80" x2="418" y2="80" stroke="#8b5cf6" stroke-width="1.5" marker-end="url(#wa)"/>
+
+        <!-- 출력 -->
+        <rect x="420" y="55" width="160" height="50" rx="8" fill="#f5f3ff" stroke="#ddd6fe" stroke-width="1.5"/>
+        <text x="500" y="76" text-anchor="middle" font-size="12" font-weight="700" fill="#5b21b6">reports/weekly/</text>
+        <text x="500" y="93" text-anchor="middle" font-size="10" fill="#64748b">YYYY-WNN.md</text>
+
+        <!-- 주차 레이블 -->
+        <rect x="595" y="55" width="80" height="50" rx="8" fill="#f5f3ff" stroke="#ddd6fe" stroke-width="1.5"/>
+        <text x="635" y="76" text-anchor="middle" font-size="11" font-weight="700" fill="#5b21b6">직전</text>
+        <text x="635" y="90" text-anchor="middle" font-size="11" font-weight="700" fill="#5b21b6">ISO 주차</text>
+        <text x="635" y="104" text-anchor="middle" font-size="10" fill="#64748b">월~일</text>
+      </svg>
+    </div>
+
+    <h3>리포트 포함 내용</h3>
+    <table>
+      <tr><th>섹션</th><th>내용</th></tr>
+      <tr><td>🌤️ 날씨 요약</td><td>위치별 주간 평균·최고·최저 기온, 총 강수량, PM10·PM2.5 평균, 미세먼지 등급</td></tr>
+      <tr><td>📰 RSS 하이라이트</td><td>이번 주 총 수집 건수, 피드별 건수 표</td></tr>
+      <tr><td>피드별 상위 글</td><td>각 피드에서 최대 5개 제목 + 링크</td></tr>
+    </table>
+  </section>
+
+  <!-- ══ 워크플로우 ══ -->
+  <section id="workflows">
+    <div class="badge badge-orange">⚙️ GitHub Actions</div>
+    <h2>워크플로우 구조</h2>
+    <p>각 모듈은 독립된 워크플로우 파일로 관리됩니다. <span class="inline-code">concurrency: group: commit-main</span>으로 동시 커밋 충돌을 방지합니다.</p>
+
+    <h3>공통 패턴</h3>
+    <pre><code>jobs:
+  collect-and-commit:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write        # git push 권한
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv sync --frozen
+      - run: uv run python -m daily_hub.collectors.rss   # 모듈별 변경
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add snapshots/rss state/rss-last-seen.json
+          git diff --staged --quiet || git commit -m "chore(rss): daily snapshot $(date +%Y-%m-%d)"
+          git push</code></pre>
+
+    <div class="info info-orange">
+      <span>⚠️</span>
+      <div>수동 트리거 테스트는 GitHub Actions 탭 → 워크플로우 선택 → <strong>Run workflow</strong> 버튼으로 언제든 가능합니다.</div>
+    </div>
+  </section>
+
+  <!-- ══ 디렉터리 ══ -->
+  <section id="structure">
+    <div class="badge badge-blue">📁 디렉터리 구조</div>
+    <h2>파일·폴더 구조</h2>
+
+    <div class="tree">
+      <span class="dir">daily-snapshot-hub/</span><br>
+      ├── <span class="dir">.github/workflows/</span><br>
+      │   ├── <span class="file">rss.yml</span>              <span class="note"># RSS 워크플로우 (매일 08:00)</span><br>
+      │   ├── <span class="file">weather.yml</span>          <span class="note"># 날씨 워크플로우 (매일 08:10)</span><br>
+      │   └── <span class="file">weekly-report.yml</span>   <span class="note"># 주간 리포트 (월요일 08:30)</span><br>
+      ├── <span class="dir">src/daily_hub/</span><br>
+      │   ├── <span class="dir">common/</span>              <span class="note"># dates.py, paths.py, markdown.py</span><br>
+      │   ├── <span class="dir">collectors/</span>          <span class="note"># rss.py, weather.py</span><br>
+      │   └── <span class="dir">reporters/</span>           <span class="note"># weekly.py</span><br>
+      ├── <span class="dir">snapshots/</span>               <span class="note"># 수집 결과 (git 커밋됨)</span><br>
+      │   ├── <span class="dir">rss/</span>                 <span class="note"># YYYY-MM-DD.md</span><br>
+      │   └── <span class="dir">weather/</span>             <span class="note"># YYYY-MM.csv</span><br>
+      ├── <span class="dir">reports/weekly/</span>          <span class="note"># YYYY-WNN.md</span><br>
+      ├── <span class="dir">state/</span>                   <span class="note"># rss-last-seen.json</span><br>
+      ├── <span class="dir">config/</span>                  <span class="note"># rss-feeds.yml, locations.yml</span><br>
+      ├── <span class="dir">tests/</span>                   <span class="note"># test_rss.py, test_weather.py, test_weekly.py</span><br>
+      └── <span class="file">pyproject.toml</span>
+    </div>
+  </section>
+
+  <!-- ══ 설정 가이드 ══ -->
+  <section id="config">
+    <div class="badge badge-green">🔧 설정 가이드</div>
+    <h2>설정 파일 가이드</h2>
+
+    <h3>RSS 피드 추가 · 제거</h3>
+    <p><span class="inline-code">config/rss-feeds.yml</span>에서 피드를 추가하거나 제거하면 코드 변경 없이 바로 적용됩니다.</p>
+    <pre><code>feeds:
+  - name: My New Feed
+    url: https://example.com/feed
+    category: 카테고리명</code></pre>
+
+    <h3>날씨 수집 도시 추가</h3>
+    <p><span class="inline-code">config/locations.yml</span>에 좌표를 추가합니다. 위도·경도는 Google Maps에서 확인할 수 있습니다.</p>
+    <pre><code>locations:
+  - name: Daegu
+    name_ko: 대구
+    latitude: 35.8714
+    longitude: 128.6014
+    timezone: Asia/Seoul</code></pre>
+
+    <h3>로컬 실행</h3>
+    <pre><code># 의존성 설치
+uv sync
+
+# RSS 수동 실행
+uv run python -m daily_hub.collectors.rss
+
+# 날씨 수동 실행
+uv run python -m daily_hub.collectors.weather
+
+# 주간 리포트 수동 생성
+uv run python -m daily_hub.reporters.weekly
+
+# 테스트
+uv run pytest -v</code></pre>
+  </section>
+
+</main>
+
+<script>
+  // 스크롤 스파이
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('nav a');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => { if (window.scrollY >= s.offsetTop - 80) current = s.id; });
+    navLinks.forEach(a => {
+      a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+    });
+  });
+</script>
+</body>
+</html>
