@@ -2,8 +2,8 @@
 from pathlib import Path
 from datetime import date as DateType
 
-# repo 루트 = 이 파일 기준 4단계 위
-REPO_ROOT = Path(__file__).resolve().parents[4]
+# repo 루트 = 이 파일 기준 3단계 위 (common → daily_hub → src → repo root)
+REPO_ROOT = Path(__file__).resolve().parents[3]
 
 SNAPSHOTS_DIR = REPO_ROOT / "snapshots"
 REPORTS_DIR = REPO_ROOT / "reports"
